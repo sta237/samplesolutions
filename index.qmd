@@ -1,0 +1,751 @@
+---
+title: "R Practice Worksheets Sample Solutions"
+subtitle: "STA237: Probability, Statistics, and Data Analysis I"
+author: "Michael Jongho Moon"
+institute: "PhD Student, DoSS, University of Toronto"
+date: "Updated on May 26, 2022"
+output: html_document
+editor_options: 
+  markdown: 
+    wrap: 72
+---
+
+```{r setup, include=FALSE}
+library(knitr)
+library(kableExtra)
+```
+
+## R Practice Worksheets Sample Solutions
+
+::: {.panel-tabset}
+
+
+### Worksheet 8 Covariance and correlation
+
+#### Example: Discrete random variables
+
+Let $U$ and $V$ be two random variables with joint probability distribution defined by the following probability mass function.
+
+
+```{r echo=FALSE}
+jpmf <- rbind(
+  c("1/4", "0", "1/4", "1/2"),
+  c("0", "1/2", "0", "1/2"),
+  c("1/4", "1/2", "1/4", "1")
+  )
+rownames(jpmf) <- c("0", "1", "P(U=a)")
+colnames(jpmf) <- c("0", "1", "2", "P(V=b)")
+kable(jpmf) %>%
+  kable_paper() %>%
+  pack_rows("b", 1, 2) %>%
+  pack_rows("", 3, 3) %>%
+  add_header_above(c(" " = 1, "a" = 3, " " = 1))
+```
+
+Estimating $E\left(UV\right)$ with simulation.
+
+```{r}
+N <- 100000
+UV <- numeric(N)
+for (i in 1:N) {
+  # using the joint pmf to assign P(UV = x)
+  UV[i] <- sample(c(0, 1), 1, prob = c(1/4 + 1/4, 1/2))
+}
+sum(UV) / N
+```
+
+With `replace = TRUE`, you don't need a for loop.
+
+```{r}
+UplusV <- sample(
+   c(0, 1, 2, 3),      # all possible outcomes of U + V
+   N,                  # number of simulations
+   replace = TRUE,     # because each sampling needs to be independent
+   prob = c(1/4, 0, 3/4, 0) # probabilities associated with each possible outcome
+)
+sum(UplusV) / N
+```
+
+The following method is valid as well because we are computing expectation of a **linear function** of $U$ and $V$.
+
+```{r}
+U <- sample(c(0, 1, 1, 2), N, replace = TRUE) 
+V <- sample(0:1, N, replace = TRUE)
+sum(U + V) / N
+```
+
+
+#### Example: Correlation coefficient
+
+Estimate $\rho\left(U,U^2\right)$ when $U\sim\text{U}(0,a)$ for $a=2$ and $a=200$. In class, we computed the value to be $\sqrt{15}/2$= `r sqrt(15)/4` for any $a>0$
+
+```{r}
+sqrt(15) / 4
+```
+
+$$a=2$$
+
+```{r}
+# Write your R codes here.
+N <- 100000
+a <- 2
+U <- runif(N, max = a)
+# Var(U) = E(U^2) - (E(U))^2
+# Var(U^2) = E(U^4) - (E(U^2))^2
+# Cov(U, U^2) = E(U^3) - E(U)E(U^2)
+EU <- sum(U) / N
+EU2 <- sum(U^2) / N # not EU^2; not sum(U)^2 / N
+EU3 <- sum(U^3) / N
+EU4 <- sum(U^4) / N
+varU <- EU2 - EU^2
+varU2 <- EU4 - EU2^2
+covUU2 <- EU3 - EU * EU2
+
+rhoUU2 <- covUU2 / sqrt(varU * varU2)
+
+print(paste("E(U) =", EU, ";  E(U^2) =", EU2, 
+            ";  E(U^3) =", EU3, ";  E(U^4) = ", EU4))
+print(paste("Var(U) =", varU, ";   Var(U^2) =", varU2, 
+            ";   Cov(U,U^2) =", covUU2))
+print(paste("roh(U, U^2) =", rhoUU2))
+```
+
+$$a=200$$
+
+```{r}
+a <- 200
+U <- runif(N, max = a)
+EU <- sum(U) / N
+EU2 <- sum(U^2) / N
+EU3 <- sum(U^3) / N
+EU4 <- sum(U^4) / N
+varU <- EU2 - EU^2
+varU2 <- EU4 - EU2^2
+covUU2 <- EU3 - EU * EU2
+
+rhoUU2 <- covUU2 / sqrt(varU * varU2)
+
+print(paste("E(U) =", EU, ";  E(U^2) =", EU2, 
+            ";  E(U^3) =", EU3, ";  E(U^4) = ", EU4))
+print(paste("Var(U) =", varU, ";   Var(U^2) =", varU2, 
+            ";   Cov(U,U^2) =", covUU2))
+print(paste("roh(U, U^2) =", rhoUU2))
+```
+
+
+#### Example: Correlation and independence
+
+Let $X\sim N(0,1)$ and $Y=X^2$. Are they correlated?
+
+
+```{r}
+N <- 10000000
+X <- rnorm(N, mean = 0, sd = 1)
+EX <- sum(X) / N
+EX2 <- sum(X^2) / N
+EX3 <- sum(X^3) / N
+covXY <- EX3 - EX * EX2
+# note that because this is simulation, we may even get very small negative values
+covXY
+print(paste("Cov(X, Y) =", round(covXY, 2)))
+```
+
+### Worksheet 7: Simulating joint distributions
+
+$$R\sim \text{U}(0,1)\quad \text{and}\quad \theta\sim\text{U}(0,\pi)$$
+$$X=R\cos\left(\theta\right)\quad\text{and}\quad Y=R\sin\left(\theta\right)$$
+
+Simulating $R$ and $\theta$ is simple.
+
+```{r}
+N <- 1000
+R_sim <- runif(N)
+theta_sim <- runif(N, max = pi) # "pi" is provided by R
+```
+
+We can then use the simulated values to compute $X$ and $Y$.
+
+```{r}
+# arithmetic functions are applied to each value of the vectors
+# when the vector sizes match
+X <- R_sim * cos(theta_sim)
+Y <- R_sim * sin(theta_sim)
+```
+
+We can then plot the values on a semi-circle using base R's `plot()` and `points()` functions. To plot a semi-circle first create a sequence of values that range from 0 to $\pi$. Use the values to compute coordinates $(x,y)$ of a semi-circle. To make the curve look smooth, use finely spaced values.
+
+```{r fig.asp=2/3}
+# create a sequence of value range from 0 to pi increasing by .01
+circlei <- seq(from = 0, to = pi, by = .01) 
+plot(
+  cos(circlei), sin(circlei), # coordinates are (cos(i), sin(i))
+  type = "l",                 # connect the coordinates with a line (curve)
+  xlab = "x", ylab = "y"      # axis labels
+)
+points(
+  X, Y,                       # add the points of (X,Y) on top of the semi-circle
+  pch = 19,                   # use filled-in dots
+  # set the colour parameter to use semi-transparent dots
+  col = rgb(red = 0, green = 0, blue = 0, alpha = 0.2)
+) 
+```
+
+Alternatively, in `ggplot()` ...
+
+
+```{r fig.asp=1/2}
+library(ggplot2)
+ggplot() +
+  theme_classic() +
+  geom_line(aes(x = cos(circlei), y = sin(circlei))) + # draw the semi-circle
+  geom_point(aes(x = X, y = Y), alpha = .3) +          # place semi-transparent dots
+  labs(x = "x", y = "y")
+```
+
+
+Note that the points are not uniformly distributed on the Cartesian plane If you wanted uniformly distributed points on the Cartesian plane, you need x and y coordinates to be independently uniform. Then, you can keep those that are in the semi-circle only.
+
+```{r}
+X <- runif(N, min = -1)
+Y <- runif(N)
+insemicirlce <- (X^2 + Y^2) <= 1
+ggplot() +
+  theme_classic() +
+  geom_line(aes(x = cos(circlei), y = sin(circlei))) + # draw the semi-circle
+  geom_point(aes(x = X[insemicirlce], y = Y[insemicirlce]), alpha = .3) +          # place semi-transparent dots
+  labs(x = "x", y = "y")
+```
+
+Note that this doesn't guarantee the full `r N` samples. Only `r round(sum(insemicirlce)/N, 3)*100` are kept (which could be an issue if you wanted at least `r N` samples).
+
+```{r}
+sum(insemicirlce)
+```
+
+
+### Worksheet 6: Variable transformation
+
+
+Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson06&urlpath=shiny%2Frlesson06%2Frlesson06.Rmd&branch=main).
+
+#### Generating random numbers from \(U(0,1)\)
+
+Generating \(X\) with probability mass function \(p\).
+
+\[p\left(x\right) = \begin{cases} 1/2 & x= 0 \\ 1/3 & x = 1 \\ 1/6 & x = 3 \\ 0 & \text{otherwise.}\end{cases}\]
+
+Using a for loop ...
+
+```{r}
+N <- 100000
+set.seed(237) # fixing the random sequence
+U <- runif(N) # generate samples from U(0,1)
+X <- numeric(N)
+for (ind in 1:N) {
+    if (U[ind] < 1/2) {
+        X[ind] <- 0
+    } else if (U[ind] < (1/2 + 1/3)) {
+        X[ind] <- 1
+    } else {
+        X[ind] <- 3
+    }
+}
+table(X) / N
+```
+
+Using `ifelse()` ...
+
+```{r}
+N <- 100000
+set.seed(237) # fixing the random sequence
+U <- runif(N) # generate samples from U(0,1)
+X <- ifelse(
+   U < 1/2,    # the condition
+   0,          # value when Yes
+   ifelse(U < 1/2 + 1/3, 1, 3)
+)
+table(X) / N
+```
+
+
+Generating $W\sim\text{Exp}(5)$ using its cumulative distribution function.
+
+```{r}
+N <- 100000
+set.seed(1)
+# generate samples from U(0,1)
+U <- runif(N) 
+W <- -log(1 - U) / 5 # inverse of F_W
+```
+
+Using `rexp()` ...
+
+```{r}
+N <- 100000
+# generate samples from Exp(5) directly
+set.seed(1)
+W2 <- rexp(N, 5)
+```
+
+Comparing the distributions of the generated values using `hist()`.
+
+```{r}
+#| layout-ncol: 2
+hist(W, main = "Histogram of W generated from its cdf", xlab = "W")
+hist(W2, main = "Histogram of W generated from rexp()", xlab = "W")
+```
+
+```{r}
+#| layout-ncol: 2
+hist(W, main = "Density histogram of W generated from its cdf", xlab = "W", freq = FALSE)
+hist(W2, main = "Density histogram of W generated from rexp()", xlab = "W", freq = FALSE)
+```
+
+Constructing the same plots using `ggplot()` ...
+
+```{r}
+#| layout-ncol: 2
+library(ggplot2)
+ggplot() +
+  theme_classic() +
+  geom_histogram(aes(x = W, y = after_stat(density)),
+                 breaks = seq(0, 2.2, 0.1)) +
+  labs(title = "Density histogram of W generated from its cdf" ,
+       y = "Density", x = "W")
+ggplot() +
+  theme_classic() +
+  geom_histogram(aes(x = W2, y = after_stat(density)),
+                 breaks = seq(0, 2.2, 0.1)) +
+  labs(title = "Density histogram of W generated from rexp()" ,
+       y = "Density", x = "W")
+
+```
+
+#### Simulating conditions and control flow
+
+Defining a helper function for playing a hand.
+
+```{r}
+# playing a hand in rock-paper-scissors
+play_a_hand <- function() {
+  # rock is 1, paper is 2, scissors is 3
+  return(sample(1:3, size = 1))
+}
+```
+
+```{r}
+# 1. if tie -> lose 3 / 3 to the candies
+# 2.1 else if you play a rock -> win or lose 1
+# 2.2 else if you play a paper -> win or lose 2
+# 2.3 else if you play a scissors -> win or lose 3
+N <- 100000
+Y <- numeric(N)
+X <- numeric(N)
+W <- numeric(N)
+
+for (sim in 1:N) {
+    for (round in 1:5) {
+        # new hands in each round
+        you <- play_a_hand()
+        michael <- play_a_hand()
+        if (you == michael) { # tie
+            Y[sim] <- Y[sim] - 3
+            X[sim] <- X[sim] + 3 * 2 # from both you and Michael
+        } else { # not a tie
+            if (you == 1) {
+                Y[sim] <- Y[sim] + you * ifelse(michael == 3, 1, -1) 
+                W[sim] <- W[sim] + ifelse(michael == 3, 1, 0) # add 1 if you win
+            } 
+            if (you == 2) {
+                Y[sim] <- Y[sim] + you * ifelse(michael == 1, 1, -1) 
+                W[sim] <- W[sim] + ifelse(michael == 1, 1, 0) # add 1 if you win
+            }
+            if (you == 3) {
+                Y[sim] <- Y[sim] + you * ifelse(michael == 2, 1, -1) 
+                W[sim] <- W[sim] + ifelse(michael == 2, 1, 0) # add 1 if you win
+            }
+        }
+    }
+}
+print(paste("E(Y) =", sum(Y) / N))
+print(paste("P(X > 6) = ", sum(X > 6)/ N))
+print(paste("P(W <= 2) = ", sum(W <= 2) /N))
+```
+
+Constructing the histograms of simulated \(Y\), \(X\), and \(W\) values.
+
+```{r}
+#| layout-ncol: 3
+library(ggplot2)
+ggplot() +
+  theme_minimal() +
+  geom_histogram(aes(x = Y), breaks = seq(-15, 15, 1)) +
+  labs(y = "", title = "Histogram of simulated Y")
+ggplot() +
+  theme_minimal() +
+  geom_histogram(aes(x = X), breaks = seq(0, 30, 1)) +
+  labs(y = "", title = "Histogram of simulated X")
+ggplot() +
+  theme_minimal() +
+  geom_histogram(aes(x = W), breaks = seq(0, 5, 1)) +
+  labs(y = "", title = "Histogram of simulated W")
+
+```
+
+### Worksheet 5: Expectation and variance
+
+Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson05&urlpath=shiny%2Frlesson05%2Frlesson05.Rmd&branch=main).
+
+#### Computing expectation and variance
+
+Estimating \(E(N)\) where \(N\sim \text{Bin}(20, 0.4)\).
+
+```{r}
+M <- 100000 # number of simulations
+# generate M random samples of N
+# a. dxxx b. pxxx c. rxxx d. qxxx
+# rxxx -> generate random samples
+samp <- rbinom(M, 20, .4) # Binom(20, 0.4)
+sum(samp) / M # the weighted average estimates the expecation
+```
+
+Estimating \(\text{Var}(N)\).
+
+```{r}
+M <- 100000 # number of simulations
+samp <- rbinom(M, 20, .4) # simulate M x Binom(20, 0.4)
+EN2 <- sum(samp^2) / M # E[N^2]; samp^2 takes care of ^2 for each element
+EN <- sum(samp) / M
+print("Estimated expected value of N^2:")
+EN2
+print("Estimated expected value of N:")
+EN
+print("Estimated variance of N:")
+EN2 - EN^2
+```
+
+#### Working with R's geometric distribution
+
+Remember that R's version is based on the number of **failures before** the first success whereas the textbook version is the number **trials until** the first success.
+
+```{r}
+y <- 1:20 # values of interest
+# pmf -> dxxxx
+# geometric -> dgeom
+pmfY <- dgeom(y - 1, .3)
+# cdf -> pxxxx
+# geometric -> pgeom
+cdfY <- pgeom(y - 1, .3)
+# plotting pmf: using base R
+# plot(y, pmfY, xlab = "y", ylab = "pmf of Y")
+# plotting pmf: using ggplot2
+library(ggplot2)
+# specify with `mapping = ` that you are not 
+# passing a data table as your first argument
+ggplot(mapping = aes(x = y, y = pmfY)) + 
+  theme_minimal() +
+  geom_segment(aes(xend = y, yend = 0)) +
+  geom_point() +
+  labs(x = "y", y = "pmf of Y")
+```
+
+
+### Worksheet 4: Continuous random variables
+
+Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson04&urlpath=shiny%2Frlesson04%2Frlesson04.Rmd&branch=master).
+
+#### Computing probabilities for normal random variables
+
+
+For \(X\sim N(1, 4^2)\), computing \(P(X>2)\).
+
+```{r}
+# using built-in functions
+pnorm((-.5 - 1) / 4) # using transformation to Z
+pnorm(-.5, 1, 4) # using the built-in functions parameters to specify the distribution
+
+# P(X > 2)
+1 - pnorm(2, 1, 4)
+```
+
+Computing 25th percentile.
+
+```{r}
+qnorm(0.25, 1, 4) # q.25 of X directly
+qnorm(0.25) * 4 + 1 # q.25 of Z then transform
+```
+
+
+#### Computing probabilities directly
+
+Computing \(f(2)\), where \(f(x)=\lambda e^{-\lambda x}\) for \(\lambda = 1\).
+
+```{r}
+lambda <- 1
+x <- 2
+lambda * exp(1)^(-lambda * x) # exp(1) = e
+lambda * exp(-lambda * x) # exp(x) = e^x
+
+dexp(x, lambda) # R's built-in family of functions for common distributions
+
+# you can also define your own function
+pdf_of_exp <- function(a, rate) {
+    term1 <- rate
+    term2 <- exp(-rate * a)
+    term1 * term2
+}
+pdf_of_exp(x, lambda)
+
+```
+
+
+Computing \(F(2)\).
+
+```{r}
+# custom function
+cdf_of_exp <- function(a, rate) {
+    1 - exp(-rate * a)
+}
+cdf_of_exp(2, 1)
+
+# built-in function
+pexp(2, 1)
+```
+
+### Worksheet 3: Discrete random variables
+
+Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson03&urlpath=shiny%2Frlesson03%2Frlesson03.Rmd&branch=main).
+
+#### Example: 10 rounds of rock paper scissors
+
+Computing pmf of a binomial random variable.
+
+```{r}
+pmfN <- dbinom(0:10, 10, 1/3) # compute for values 0, 1, 2, ..., 10
+binomN <- data.frame(n = 0:10, pmf = pmfN) # place them in a table format
+binomN
+```
+
+Computing the cdf of a binomial random variable.
+
+```{r}
+cdfN <- pbinom(0:10, 10, 1/3)
+binomN["cdf"] <- cdfN # add a new column to an existing table
+binomN
+```
+
+(Optional) Plotting using `ggplot`.
+
+```{r}
+library(ggplot2) # load the library
+# loading the library allows the user to access
+# the family of functions provided by the library
+
+ggplot(binomN, aes(x = n)) + # initialize a ggplot canvas with the data and set x axis to column `n`
+  geom_point(aes(y = pmf)) + # add points with y axis mapped to the pmf
+  geom_segment(aes(y = 0, yend = pmf, xend = n)) + # draw lines from the points to y = 0
+  theme_classic() + # controls aesthetics; you can also try theme_minimal(), theme_void(), etc.
+  labs(
+    title = "Probability mass function of N", 
+    y = expression(p[N]) # allows mathematical expressions
+  )
+```
+
+(Optional) Plotting the cdf. This requires a more advanced level understading of R and `tidyverse` family of packages than I expect from the class.
+
+```{r}
+#| message: false
+#| warning: false
+library(tidyverse)
+binomN <- binomN %>% 
+  add_row(n = -1, pmf = 0, cdf = 0, .before = 1) %>%
+  add_row(n = 11, pmf = 0, cdf = 1)
+ggplot(binomN, aes(x = n, y = cdf)) + 
+  theme_classic() +
+  geom_segment(aes(xend = lead(n), yend = cdf)) +
+  geom_point(data = filter(binomN, n > -1, n < 11)) +
+  labs(y = expression(F[N]), title = "Cumulative distribution function of N") +
+  scale_y_continuous(limits = c(0, 1)) +
+  scale_x_continuous(limits = c(-1, 11), breaks = seq(0, 10, 5))
+```
+
+
+#### Poisson and binomial distributions
+
+```{r}
+library(ggplot2)
+x <- 0:10
+df <- data.frame(
+  x = x,
+  bin30 = dbinom(x, size = 30, prob = 0.1),
+  bin100 = dbinom(x, size = 100, prob = .03),
+  bin300 = dbinom(x, size = 300, prob = .01),
+  pois = dpois(x, 3)
+)
+ggplot(df, aes(x = x)) +
+  theme_minimal() +
+  # adding pch within mapping creates a legend based on point type
+  geom_point(aes(y = bin30, pch = "Bin(30, 0.1)"), alpha = 0.5, size = 3) + 
+  geom_point(aes(y = bin100, pch = "Bin(100, 0.03)"), alpha = 0.5, size = 3) +
+  geom_point(aes(y = bin300, pch = "Bin(300, 0.01)"), alpha = 0.5, size = 3) +
+  geom_point(aes(y = pois, pch = "Pois(3)"), alpha = 0.5, size = 3) +
+  labs(y = "P(x)", pch = "Distribution")
+```
+
+#### Simulating a distribution
+
+Simulate throwing a die until the sum is greater than 6 using `replicate()` ...
+
+```{r}
+N <- 10^6
+# simulation approach 1
+res1 <- replicate(
+  N, {
+    x <- 0; s <- 0
+    while(s < 7) { # loop while the sum is less than 7
+      s <- s + sample(1:6, 1)
+      x <- x + 1 # coun the number of rolls
+    }
+    x
+  }
+)
+cat('F(1)=', sum(res1 <= 1)/N)
+cat('F(2)=', sum(res1 <= 2)/N)
+cat('F(7)=', sum(res1 <= 7)/N)
+```
+
+(optional) ... and using a matrix. The level of programming complexity demonstrated here is beyond what I expect from the class.
+
+```{r}
+s <- matrix(
+  sample(1:6, N*7, replace = TRUE),
+  ncol = 7
+) # simulate 7 rolls each time
+cumulative_sums <- apply(s, 1, cumsum) # get cumulative sum for each simulation
+# check which is the first roll that exceeds 6
+res2 <- apply(cumulative_sums, 2, function(x) min(which(x > 6))) 
+cat('F(1)=', sum(res2 <= 1)/N)
+cat('F(2)=', sum(res2 <= 2)/N)
+cat('F(7)=', sum(res2 <= 7)/N)
+```
+
+### Worksheet 2: Conditional probability and independence
+
+Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson02&urlpath=shiny%2Frlesson02%2Frlesson02.Rmd&branch=main).
+
+#### Simulating conditional events
+
+Simulating flu with different probabilities based on vaccination status.
+
+```{r}
+# want: P(flu) 
+N <- 10^6
+# the probabilities
+pvac <- 0.35
+pflu_vac <- 0.03
+pflu_no_vac <- 0.12
+# simulate vaccinated population with TRUE / FALSE otherwise
+sim_vac <- sample(
+  x = c(T, F), size = N, replace = TRUE,
+  prob = c(pvac, 1 - pvac)
+) # we can pass the probabilities manually
+sim_flu <- logical(N) # placeholder of T/F
+for (ind in 1:N) {
+    if (sim_vac[ind]) { # vaccinated
+        sim_flu[ind] <- sample(
+           x = c(T, F), size = 1,
+           # probabilities for vaccinated
+           prob = c(pflu_vac, 1 - pflu_vac) 
+        )
+    } else { # not vaccinated
+        sim_flu[ind] <- sample(
+           x = c(T, F), size = 1,
+           # probabilities for non-vaccinated
+           prob = c(pflu_no_vac, 1 - pflu_no_vac)
+        )
+    }
+}
+sum(sim_flu) / N
+```
+
+### Worksheet 1: Estimating probability using simulations
+
+Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson01&urlpath=shiny%2Frlesson01%2Frlesson01.Rmd&branch=main).
+
+#### Example: Rolling a fair die
+
+Simulating a single role.
+
+```{r}
+sample(x = 1:6, size = 1)
+```
+
+Simulating \(N\) times using a for loop ...
+
+```{r}
+N <- 10
+draw <- numeric(N) # a placeholder
+for (i in 1:N) {
+  draw[i] <- sample(1:6, 1) # place simulations inside the placeholder
+}
+draw
+```
+
+... using the built-in handling of vectors.
+
+```{r}
+N <- 15
+draw <- sample(1:6, N, replace = TRUE)
+draw
+```
+
+Simulating $P(A)$.
+
+```{r}
+N <- 10^6 # one million times
+draw <- sample(1:6, N, replace = TRUE)
+# check the remainder after dividing by 2 is 0, i.e., is even
+# the checking is done for all simulated individual values
+is_even <- draw %% 2 == 0 
+sum(is_even) / N # sum() counts TRUE as 1 and FALSE as 0
+```
+
+Simulating $P(B)$.
+
+```{r}
+# we will use the same samples (draw) and N from above 
+# (may not be available on the worksheet)
+is_less_than_3 <- draw < 3
+sum(is_less_than_3) / N
+```
+
+#### Multiple experiments
+
+Simulating rolling a fair die twice.
+
+```{r}
+N <- 10^6
+# replicate outputs result of `n` repetitions of 
+# the operations described in `expr`
+# it allows replicating multiple lines of codes
+C <- replicate( 
+  n = N, expr = {
+    # roll a die twice
+    roll <- sample(1:6, size = 2, replace = TRUE) 
+    # output whether the sum is greater than or equal to 8
+    sum(roll) >= 8
+  })
+sum(C)/N
+```
+
+The simulated values may be, in fact, highly likely to be, different each time 
+you run the code. This is expected as R samples from a _random_ or unpredictable
+set of values each time it samples.
+
+:::
+
+&copy; 2022. Michael J. Moon. University of Toronto.
+
+Sharing, posting, selling, or using this material
+outside of your personal use in this course is
+<strong>NOT</strong> permitted under any circumstances.
