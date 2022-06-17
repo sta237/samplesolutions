@@ -13,12 +13,405 @@ editor_options:
 ```{r setup, include=FALSE}
 library(knitr)
 library(kableExtra)
+set.seed(878897)
 ```
 
 ## R Practice Worksheets Sample Solutions
 
 ::: {.panel-tabset}
 
+
+### Worksheet 10: Law of large numbers
+
+#### Law of large numbers in action
+
+Simulating 1,000 samples of $X\sim N(0,1)$ and inspecting the distribution of the first 10, 100, and 1,000. I am fixing the x-axis limits to make the comparison more visual.
+
+```{r}
+#| layout-ncol: 3
+x <- rnorm(1000)
+hist(x[1:10], xlim = c(-5,5), main = "First 10")
+hist(x[1:100], xlim = c(-5,5), main = "First 100")
+hist(x[1:1000], xlim = c(-5,5), main = "All 1,000")
+```
+
+Using `ggplot()`...
+
+```{r}
+#| layout-ncol: 3
+library(ggplot2)
+# I can use the same template for all three by defininit an empty canvas and adding the geoms later
+plt_base <- ggplot() +
+  theme_classic() +
+  xlim(c(-5, 5))
+plt_base + geom_histogram(aes(x[1:10]), bins = 30)
+plt_base + geom_histogram(aes(x[1:100]), bins = 30)
+plt_base + geom_histogram(aes(x[1:1000]), bins = 30)
+```
+
+With more samples, it becomes more apparent that the centre of the distribution is at 0. We can also plot how the mean changes as you add more samples.
+
+To compute cumulative means, we can use one of the following methods.
+
+1. use a loop:
+
+```{r}
+xbar1 <- numeric(1000)
+for (ind in 1:1000) {
+  xbar1[ind] <- sum(x[1:ind]) / ind
+}
+```
+
+2. use `sapply()`:
+
+```{r}
+xbar2 <- sapply(1:1000, function(ind) sum(x[1:ind]) / ind)
+```
+
+3. use `cumsum()`, which computes cumulative sums given a vector:
+
+```{r}
+xbar3 <- cumsum(x) / (1:1000)
+```
+
+
+We can check that all results are indeed the same. `all()` returns `TRUE` when all elements of a given vector are `TRUE`.
+
+```{r}
+all(xbar1 == xbar2)
+all(xbar2 == xbar3)
+```
+
+
+We can then plot the means. A horizontal dotted line at the population mean is drawn in red. In base R, the line is added with `abline(h = <mean>)`. `lty` argument controls the line type.
+
+```{r}
+plot(xbar1, xlab = "Xbar")
+abline(h = 0, col = 2, lty = 3) 
+```
+
+Using `ggplot()`, we can use `geom_hline()`. The argument names are self-explanatory.
+
+```{r}
+ggplot() +
+  theme_classic() +
+  geom_point(aes(x = 1:1000, y = xbar1), alpha = 0.5) + 
+  geom_hline(yintercept = 0, colour = 2, linetype = "dotted") +
+  labs(x = "Xbar") 
+```
+
+As a side, we can compare the resulting plot from a distribution which doesn't have a mean defined. The Cauchy distribution, which is the ratio of two independent normal random variables with mean 0, is an example with no mean. 
+
+```{r}
+y <- rcauchy(1000)
+ybar <- cumsum(y) / (1:1000)
+ggplot() +
+  theme_classic() +
+  geom_point(aes(x = 1:1000, y = ybar), alpha = 0.5) + 
+  geom_hline(yintercept = 0, colour = 2, linetype = "dotted") +
+  labs(x = "Xbar") 
+```
+
+
+#### Sampling distributions
+
+In the previous section, we looked at sampling distributions of individual $X_i$'s with a histogram. In the plots below, we will inspect sampling distributions of $\overline{X}=\left.\sum_{i=1}^n X_i\right/ n$. For each random variable below, I will ... 
+
+1. generate 10,000 simulates of $\overline{X}_{10}$, $\overline{X}_{50}$, $\overline{X}_{100}$, $\overline{X}_{1000}$;
+2. store them in a data frame; and
+3. plot their density curves using `density()` and `geom_density()`).
+
+To generates samples of $\overline{X}_n$, I use `mean(x)` which is equivalent to `sum(x) / length(x)`, and `replicate()` which helps replicate the sample generation. 
+
+##### Normal distribution
+
+$$X\sim N\left(5, 5^2\right)$$
+
+```{r}
+m <- 10000
+# create a data frame with columns xbar10, xbar50, xbar100, and xbar1000
+xbars <- data.frame(
+  xbar10 = replicate(m, mean(rnorm(10, mean = 5, sd = 5))),
+  xbar50 = replicate(m, mean(rnorm(50, mean = 5, sd = 5))),
+  xbar100 = replicate(m, mean(rnorm(100, mean = 5, sd = 5))),
+  xbar1000 = replicate(m, mean(rnorm(1000, mean = 5, sd = 5)))
+)
+```
+
+
+```{r}
+# using base R plot() and density()
+plot(density(xbars$xbar10), main = "N(5,25)", 
+     xlim = c(-2, 12), ylim = c(0, 2.5), col = 1)
+lines(density(xbars$xbar50), col = 2)
+lines(density(xbars$xbar100), col = 3)
+lines(density(xbars$xbar1000), col = 4)
+```
+
+
+```{r}
+# using ggplot()
+ggplot(xbars) + 
+  theme_classic() +
+  geom_density(aes(x = xbar10, colour = "n = 10")) +
+  geom_density(aes(x = xbar50, colour = "n = 50")) +
+  geom_density(aes(x = xbar100, colour = "n = 100")) +
+  geom_density(aes(x = xbar1000, colour = "n = 1,000")) +
+  labs(title = "N(5,25)", colour = "Sample size", x = "Sample mean", y = "Density")
+```
+
+`ggplot()` generates a legend for the colours used. In base R, you need to create your own legend using `legend()` function which I didn't show here. For the following distributions, I will only show the version using `ggplot()`.
+
+
+##### Exponential distribution
+
+$$Y\sim \text{Exp}\left(\left.1\right/5\right)$$
+
+
+```{r}
+ybars <- data.frame(
+  ybar10 = replicate(m, mean(rexp(10, rate = 1/5))),
+  ybar50 = replicate(m, mean(rexp(50, rate = 1/5))),
+  ybar100 = replicate(m, mean(rexp(100, rate = 1/5))),
+  ybar1000 = replicate(m, mean(rexp(1000, rate = 1/5)))
+)
+```
+
+```{r}
+ggplot(ybars) + 
+  theme_classic() +
+  geom_density(aes(x = ybar10, colour = "n = 10")) +
+  geom_density(aes(x = ybar50, colour = "n = 50")) +
+  geom_density(aes(x = ybar100, colour = "n = 100")) +
+  geom_density(aes(x = ybar1000, colour = "n = 1,000")) +
+  labs(title = "Exp(1/5)", colour = "Sample size", x = "Sample mean", y = "Density")
+```
+
+
+##### Binomial distribution
+
+$$W\sim \text{Binom}\left(10, \left.1\right/10\right)$$
+
+
+```{r}
+wbars <- data.frame(
+  wbar10 = replicate(m, mean(rbinom(10, size = 10, prob = 1/10))),
+  wbar50 = replicate(m, mean(rbinom(50, size = 10, prob = 1/10))),
+  wbar100 = replicate(m, mean(rbinom(100, size = 10, prob = 1/10))),
+  wbar1000 = replicate(m, mean(rbinom(1000, size = 10, prob = 1/10)))
+)
+```
+
+```{r}
+ggplot(wbars) + 
+  theme_classic() +
+  geom_density(aes(x = wbar10, colour = "n = 10")) +
+  geom_density(aes(x = wbar50, colour = "n = 50")) +
+  geom_density(aes(x = wbar100, colour = "n = 100")) +
+  geom_density(aes(x = wbar1000, colour = "n = 1,000")) +
+  labs(title = "Binom(10, 1/20)", colour = "Sample size", x = "Sample mean", y = "Density")
+```
+
+
+
+##### Poisson distribution
+
+$$U\sim \text{Pois}\left(10\right)$$
+
+
+```{r}
+ubars <- data.frame(
+  ubar10 = replicate(m, mean(rpois(10, lambda = 10))),
+  ubar50 = replicate(m, mean(rpois(50, lambda = 10))),
+  ubar100 = replicate(m, mean(rpois(100, lambda = 10))),
+  ubar1000 = replicate(m, mean(rpois(1000, lambda = 10)))
+)
+```
+
+```{r}
+ggplot(ubars) + 
+  theme_classic() +
+  geom_density(aes(x = ubar10, colour = "n = 10")) +
+  geom_density(aes(x = ubar50, colour = "n = 50")) +
+  geom_density(aes(x = ubar100, colour = "n = 100")) +
+  geom_density(aes(x = ubar1000, colour = "n = 1,000")) +
+  labs(title = "Pois(10)", colour = "Sample size", x = "Sample mean", y = "Density")
+```
+
+
+### Worksheet 9: Computation with random variables
+
+#### Example: Bike tires
+
+Recall $X$ and $Y$ are random variables with a joint probability density function $f$, $W\sim\text{Ber}\left(1/2\right)$, and $V$, $X$, and $Y$ have the same distributions.
+
+$$f\left(x,y\right)=\begin{cases}
+K\left(x^2+y^2\right) & 20 \le x, y\le 50 \\
+0 & \text{otherwise}
+\end{cases}$$
+
+where $K=2\ 340\ 000^{-1}$. We also know that the marginal distribution of $V$, $X$, and $Y$ is defined by probability density function
+
+$$f\left(x\right)=\begin{cases}\frac{x^2}{78\ 000}+\frac{1}{60} & 20 \le x\le 50 \\
+0 &\text{otherwise}\end{cases}$$
+
+or cumulative distribution function
+
+$$F\left(a\right)=\begin{cases}
+0 & x<20 \\
+\frac{1}{234\ 000}a^3 + \frac{1}{60}a - \frac{43}{117} & 20 \le a \le 50 \\
+1 & x > 50.
+\end{cases}$$
+
+To simulate samples of $V$, we need $F^{-1}$. Instead of deriving the function analytically, we will program the function $F$ and use the definition
+
+$$F^{-1}\left(t\right)=\min\left\{x:F\left(x\right)\ge t\right\}.$$
+
+Defining the probability density function and the cumulative distribution function in R ...
+
+```{r}
+# pdf
+pdfX <- function(x) {
+    ifelse(x <= 50 & x >= 20, (x^2 + 1300) / 78000, 0)
+}
+# cdf
+cdfX <- function(a) {
+  ifelse(
+    a <= 20, 0, ifelse(
+      a > 50, 1, 
+      (a^3 + 3900 * a - 43 *2000)/ 234000
+    )
+  )
+}
+```
+
+Generate 100,000 samples of $U\sim \text{U}\left(0,1\right)$ and find the smallest value between 20 and 50 that returns $F\left(u\right)$ for each $u$ generated.
+
+```{r}
+N <- 100000
+U <- runif(N)
+X <- numeric(N)
+for (ind in 1:N) {
+  x_tmp <- 20 # start at 20
+  while (cdfX(x_tmp) < U[ind]) { # evaluate cdfX at current x_tmp value and compare to u
+    # if the evaluated cdf is smaller than u, increase x_tmp by a step
+    x_tmp <- x_tmp + 1 # assume the measurement precision is in whole number (step size of 1)
+  }
+  # the loop ends when the evaluated cdfX is at least u
+  # keep the x_tmp value 
+  X[ind] <- x_tmp
+}
+```
+
+We now check whether the generated sample indeed follows the distribution of $V$ by comparing the density histogram of the generated sample with the probability density function of $V$.
+
+```{r}
+library(ggplot2)
+ggplot() +
+  theme_classic() +
+  geom_histogram(aes(x = X, y = after_stat(density)), binwidth = 1) +
+  geom_function(fun = pdfX, colour = 2, size = 2)
+```
+
+
+We see that they density histogram close follows the probability density function. We can confidently use the generated sample to estimate $E(V)$ and $P(V<40)$.
+
+```{r}
+# E(V)
+sum(X) / N
+# P(V < 40)
+sum(X < 49) / N
+```
+
+
+#### Computation with normal random variables
+
+Suppose $X_1$, $X_2$, ..., $X_{25}$ are independent and follow
+
+$$X_i\sim N(0,1)$$
+
+##### Simulating a single $X_1$
+
+Simulate 100 samples of $X_1$ and
+```{r}
+N <- 100
+X1 <- rnorm(N)
+```
+
+1. plot their histogram;
+
+```{r}
+hist(X1)
+```
+
+2. compute their mean; and
+
+```{r}
+sum(X1) / N
+```
+
+3. compute their variance.
+
+```{r}
+sum(X1^2) / N - (sum(X1) / N)^2
+```
+
+
+##### Simulating $3X_1 + 2$
+
+Simulate 100 samples of $3X_1 + 2$ and
+```{r}
+X1 <- rnorm(N)
+X1transformed <- 3 * X1 + 2
+```
+
+1. plot their histogram;
+
+```{r}
+hist(X1transformed)
+```
+
+2. compute their mean; and
+
+```{r}
+sum(X1transformed) / N
+```
+
+3. compute their variance.
+
+```{r}
+sum(X1transformed^2) / N - (sum(X1transformed) / N)^2
+```
+
+
+##### Simulating $\overline{X}_{25}$
+
+Simulate 100 samples of $\overline{X}_{25}=\left.\sum_{i=1}^{25}X_i\right/25$ and plot their density histogram.
+
+```{r}
+M <- 25
+# generate 100 x 25 samples and place them in a 100 by 25 matrix
+X <- matrix(rnorm(N * M), nrow = N) 
+# for each row from 1 to N (100), compute the mean
+Xbar <- numeric(N)
+for (ind in 1:N) {
+  Xbar[ind] <- sum(X[ind, ]) / M
+}
+# or equivalently ...
+Xbar <- sapply(1:N, function(ind) sum(X[ind, ]) / M)
+```
+
+We will use `ggplot()` and overlay the theoretical probability density function.
+
+```{r}
+ggplot() +
+  theme_classic() +
+  geom_histogram(aes(x = Xbar, y = after_stat(density)), bins = 10) +
+  geom_function(fun = dnorm, args = list(sd = sqrt(1 / N)), colour = 2) +
+  geom_function(fun = dnorm, colour = 3)
+```
+
+On the plot, the red density line is the theoretical density of $\overline{X}_{25}$ and the green line is the density function of $X_1$.
 
 ### Worksheet 8 Covariance and correlation
 
@@ -228,11 +621,11 @@ sum(insemicirlce)
 
 Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson06&urlpath=shiny%2Frlesson06%2Frlesson06.Rmd&branch=main).
 
-#### Generating random numbers from \(U(0,1)\)
+#### Generating random numbers from $U(0,1)$
 
-Generating \(X\) with probability mass function \(p\).
+Generating $X$ with probability mass function $p$.
 
-\[p\left(x\right) = \begin{cases} 1/2 & x= 0 \\ 1/3 & x = 1 \\ 1/6 & x = 3 \\ 0 & \text{otherwise.}\end{cases}\]
+$$p\left(x\right) = \begin{cases} 1/2 & x= 0 \\ 1/3 & x = 1 \\ 1/6 & x = 3 \\ 0 & \text{otherwise.}\end{cases}$$
 
 Using a for loop ...
 
@@ -372,7 +765,7 @@ print(paste("P(X > 6) = ", sum(X > 6)/ N))
 print(paste("P(W <= 2) = ", sum(W <= 2) /N))
 ```
 
-Constructing the histograms of simulated \(Y\), \(X\), and \(W\) values.
+Constructing the histograms of simulated $Y$, $X$, and $W$ values.
 
 ```{r}
 #| layout-ncol: 3
@@ -398,7 +791,7 @@ Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?re
 
 #### Computing expectation and variance
 
-Estimating \(E(N)\) where \(N\sim \text{Bin}(20, 0.4)\).
+Estimating $E(N)$ where $N\sim \text{Bin}(20, 0.4)$.
 
 ```{r}
 M <- 100000 # number of simulations
@@ -409,7 +802,7 @@ samp <- rbinom(M, 20, .4) # Binom(20, 0.4)
 sum(samp) / M # the weighted average estimates the expecation
 ```
 
-Estimating \(\text{Var}(N)\).
+Estimating $\text{Var}(N)$.
 
 ```{r}
 M <- 100000 # number of simulations
@@ -457,7 +850,7 @@ Link to the [worksheet](http://jupyter.utoronto.ca/hub/user-redirect/git-pull?re
 #### Computing probabilities for normal random variables
 
 
-For \(X\sim N(1, 4^2)\), computing \(P(X>2)\).
+For $X\sim N(1, 4^2)$, computing $P(X>2)$.
 
 ```{r}
 # using built-in functions
@@ -478,7 +871,7 @@ qnorm(0.25) * 4 + 1 # q.25 of Z then transform
 
 #### Computing probabilities directly
 
-Computing \(f(2)\), where \(f(x)=\lambda e^{-\lambda x}\) for \(\lambda = 1\).
+Computing $f(2)$, where $f(x)=\lambda e^{-\lambda x}$ for $\lambda = 1$.
 
 ```{r}
 lambda <- 1
@@ -499,7 +892,7 @@ pdf_of_exp(x, lambda)
 ```
 
 
-Computing \(F(2)\).
+Computing $F(2)$.
 
 ```{r}
 # custom function
@@ -680,7 +1073,7 @@ Simulating a single role.
 sample(x = 1:6, size = 1)
 ```
 
-Simulating \(N\) times using a for loop ...
+Simulating $N$ times using a for loop ...
 
 ```{r}
 N <- 10
