@@ -333,6 +333,7 @@ $$X_i\sim N(0,1)$$
 ##### Simulating a single $X_1$
 
 Simulate 100 samples of $X_1$ and
+
 ```{r}
 N <- 100
 X1 <- rnorm(N)
@@ -360,10 +361,12 @@ sum(X1^2) / N - (sum(X1) / N)^2
 ##### Simulating $3X_1 + 2$
 
 Simulate 100 samples of $3X_1 + 2$ and
+
 ```{r}
 X1 <- rnorm(N)
 X1transformed <- 3 * X1 + 2
 ```
+
 
 1. plot their histogram;
 

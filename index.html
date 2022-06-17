@@ -138,7 +138,7 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
 <section id="r-practice-worksheets-sample-solutions" class="level2">
 <h2 class="anchored" data-anchor-id="r-practice-worksheets-sample-solutions">R Practice Worksheets Sample Solutions</h2>
 <div class="panel-tabset">
-<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Worksheet 10: Law of large numbers</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Worksheet 9: Computation with random variables</a></li></ul>
+<ul class="nav nav-tabs" role="tablist"><li class="nav-item" role="presentation"><a class="nav-link active" id="tabset-1-1-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-1" role="tab" aria-controls="tabset-1-1" aria-selected="true">Worksheet 10: Law of large numbers</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-2-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-2" role="tab" aria-controls="tabset-1-2" aria-selected="false">Worksheet 9: Computation with random variables</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-3-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-3" role="tab" aria-controls="tabset-1-3" aria-selected="false">Worksheet 8 Covariance and correlation</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-4-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-4" role="tab" aria-controls="tabset-1-4" aria-selected="false">Worksheet 7: Simulating joint distributions</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-5-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-5" role="tab" aria-controls="tabset-1-5" aria-selected="false">Worksheet 6: Variable transformation</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-6-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-6" role="tab" aria-controls="tabset-1-6" aria-selected="false">Worksheet 5: Expectation and variance</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-7-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-7" role="tab" aria-controls="tabset-1-7" aria-selected="false">Worksheet 4: Continuous random variables</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-8-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-8" role="tab" aria-controls="tabset-1-8" aria-selected="false">Worksheet 3: Discrete random variables</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-9-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-9" role="tab" aria-controls="tabset-1-9" aria-selected="false">Worksheet 2: Conditional probability and independence</a></li><li class="nav-item" role="presentation"><a class="nav-link" id="tabset-1-10-tab" data-bs-toggle="tab" data-bs-target="#tabset-1-10" role="tab" aria-controls="tabset-1-10" aria-selected="false">Worksheet 1: Estimating probability using simulations</a></li></ul>
 <div class="tab-content">
 <div id="tabset-1-1" class="tab-pane active" role="tabpanel" aria-labeledby="tabset-1-1-tab">
 <section id="law-of-large-numbers-in-action" class="level4">
@@ -465,13 +465,10 @@ $$f(x)=
 <p><span class="math display">\[X_i\sim N(0,1)\]</span></p>
 <section id="simulating-a-single-x_1" class="level5">
 <h5 class="anchored" data-anchor-id="simulating-a-single-x_1">Simulating a single <span class="math inline">\(X_1\)</span></h5>
-<p>Simulate 100 samples of <span class="math inline">\(X_1\)</span> and ::: {.cell}</p>
+<p>Simulate 100 samples of <span class="math inline">\(X_1\)</span> and</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>N <span class="ot">&lt;-</span> <span class="dv">100</span></span>
 <span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-</section>
-</section>
-</div>
-</div>
 </div>
 <ol type="1">
 <li>plot their histogram;</li>
@@ -500,12 +497,14 @@ $$f(x)=
 <pre><code>[1] 1.007305</code></pre>
 </div>
 </div>
+</section>
 <section id="simulating-3x_1-2" class="level5">
 <h5 class="anchored" data-anchor-id="simulating-3x_1-2">Simulating <span class="math inline">\(3X_1 + 2\)</span></h5>
-<p>Simulate 100 samples of <span class="math inline">\(3X_1 + 2\)</span> and ::: {.cell}</p>
+<p>Simulate 100 samples of <span class="math inline">\(3X_1 + 2\)</span> and</p>
+<div class="cell">
 <div class="sourceCode cell-code" id="cb35"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb35-1"><a href="#cb35-1" aria-hidden="true" tabindex="-1"></a>X1 <span class="ot">&lt;-</span> <span class="fu">rnorm</span>(N)</span>
 <span id="cb35-2"><a href="#cb35-2" aria-hidden="true" tabindex="-1"></a>X1transformed <span class="ot">&lt;-</span> <span class="dv">3</span> <span class="sc">*</span> X1 <span class="sc">+</span> <span class="dv">2</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<p>:::</p>
+</div>
 <ol type="1">
 <li>plot their histogram;</li>
 </ol>
@@ -562,8 +561,9 @@ $$f(x)=
 </div>
 <p>On the plot, the red density line is the theoretical density of <span class="math inline">\(\overline{X}_{25}\)</span> and the green line is the density function of <span class="math inline">\(X_1\)</span>.</p>
 </section>
-<section id="worksheet-8-covariance-and-correlation" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-8-covariance-and-correlation">Worksheet 8 Covariance and correlation</h3>
+</section>
+</div>
+<div id="tabset-1-3" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-3-tab">
 <section id="example-discrete-random-variables" class="level4">
 <h4 class="anchored" data-anchor-id="example-discrete-random-variables">Example: Discrete random variables</h4>
 <p>Let <span class="math inline">\(U\)</span> and <span class="math inline">\(V\)</span> be two random variables with joint probability distribution defined by the following probability mass function.</p>
@@ -743,9 +743,8 @@ $$f(x)=
 </div>
 </div>
 </section>
-</section>
-<section id="worksheet-7-simulating-joint-distributions" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-7-simulating-joint-distributions">Worksheet 7: Simulating joint distributions</h3>
+</div>
+<div id="tabset-1-4" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-4-tab">
 <p><span class="math display">\[R\sim \text{U}(0,1)\quad \text{and}\quad \theta\sim\text{U}(0,\pi)\]</span></p>
 <p><span class="math display">\[X=R\cos\left(\theta\right)\quad\text{and}\quad Y=R\sin\left(\theta\right)\]</span></p>
 <p>Simulating <span class="math inline">\(R\)</span> and <span class="math inline">\(\theta\)</span> is simple.</p>
@@ -813,9 +812,8 @@ $$f(x)=
 <pre><code>[1] 775</code></pre>
 </div>
 </div>
-</section>
-<section id="worksheet-6-variable-transformation" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-6-variable-transformation">Worksheet 6: Variable transformation</h3>
+</div>
+<div id="tabset-1-5" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-5-tab">
 <p>Link to the <a href="http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson06&amp;urlpath=shiny%2Frlesson06%2Frlesson06.Rmd&amp;branch=main">worksheet</a>.</p>
 <section id="generating-random-numbers-from-u01" class="level4">
 <h4 class="anchored" data-anchor-id="generating-random-numbers-from-u01">Generating random numbers from <span class="math inline">\(U(0,1)\)</span></h4>
@@ -1023,9 +1021,8 @@ $$f(x)=
 </div>
 </div>
 </section>
-</section>
-<section id="worksheet-5-expectation-and-variance" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-5-expectation-and-variance">Worksheet 5: Expectation and variance</h3>
+</div>
+<div id="tabset-1-6" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-6-tab">
 <p>Link to the <a href="http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson05&amp;urlpath=shiny%2Frlesson05%2Frlesson05.Rmd&amp;branch=main">worksheet</a>.</p>
 <section id="computing-expectation-and-variance" class="level4">
 <h4 class="anchored" data-anchor-id="computing-expectation-and-variance">Computing expectation and variance</h4>
@@ -1100,9 +1097,8 @@ $$f(x)=
 </div>
 </div>
 </section>
-</section>
-<section id="worksheet-4-continuous-random-variables" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-4-continuous-random-variables">Worksheet 4: Continuous random variables</h3>
+</div>
+<div id="tabset-1-7" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-7-tab">
 <p>Link to the <a href="http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson04&amp;urlpath=shiny%2Frlesson04%2Frlesson04.Rmd&amp;branch=master">worksheet</a>.</p>
 <section id="computing-probabilities-for-normal-random-variables" class="level4">
 <h4 class="anchored" data-anchor-id="computing-probabilities-for-normal-random-variables">Computing probabilities for normal random variables</h4>
@@ -1181,9 +1177,8 @@ $$f(x)=
 </div>
 </div>
 </section>
-</section>
-<section id="worksheet-3-discrete-random-variables" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-3-discrete-random-variables">Worksheet 3: Discrete random variables</h3>
+</div>
+<div id="tabset-1-8" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-8-tab">
 <p>Link to the <a href="http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson03&amp;urlpath=shiny%2Frlesson03%2Frlesson03.Rmd&amp;branch=main">worksheet</a>.</p>
 <section id="example-10-rounds-of-rock-paper-scissors" class="level4">
 <h4 class="anchored" data-anchor-id="example-10-rounds-of-rock-paper-scissors">Example: 10 rounds of rock paper scissors</h4>
@@ -1340,9 +1335,8 @@ $$f(x)=
 </div>
 </div>
 </section>
-</section>
-<section id="worksheet-2-conditional-probability-and-independence" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-2-conditional-probability-and-independence">Worksheet 2: Conditional probability and independence</h3>
+</div>
+<div id="tabset-1-9" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-9-tab">
 <p>Link to the <a href="http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson02&amp;urlpath=shiny%2Frlesson02%2Frlesson02.Rmd&amp;branch=main">worksheet</a>.</p>
 <section id="simulating-conditional-events" class="level4">
 <h4 class="anchored" data-anchor-id="simulating-conditional-events">Simulating conditional events</h4>
@@ -1381,9 +1375,8 @@ $$f(x)=
 </div>
 </div>
 </section>
-</section>
-<section id="worksheet-1-estimating-probability-using-simulations" class="level3">
-<h3 class="anchored" data-anchor-id="worksheet-1-estimating-probability-using-simulations">Worksheet 1: Estimating probability using simulations</h3>
+</div>
+<div id="tabset-1-10" class="tab-pane" role="tabpanel" aria-labeledby="tabset-1-10-tab">
 <p>Link to the <a href="http://jupyter.utoronto.ca/hub/user-redirect/git-pull?repo=https%3A%2F%2Fgithub.com%2Fsta237%2Frlesson01&amp;urlpath=shiny%2Frlesson01%2Frlesson01.Rmd&amp;branch=main">worksheet</a>.</p>
 <section id="example-rolling-a-fair-die" class="level4">
 <h4 class="anchored" data-anchor-id="example-rolling-a-fair-die">Example: Rolling a fair die</h4>
@@ -1459,11 +1452,12 @@ $$f(x)=
 </div>
 </div>
 <p>The simulated values may be, in fact, highly likely to be, different each time you run the code. This is expected as R samples from a <em>random</em> or unpredictable set of values each time it samples.</p>
-<p>:::</p>
+</section>
+</div>
+</div>
+</div>
 <p>© 2022. Michael J. Moon. University of Toronto.</p>
 <p>Sharing, posting, selling, or using this material outside of your personal use in this course is <strong>NOT</strong> permitted under any circumstances.</p>
-</section>
-</section>
 </section>
 
 </main>
